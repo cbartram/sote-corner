@@ -1,4 +1,4 @@
-package com.example;
+package com.sotecorner;
 
 import com.google.inject.Provides;
 import javax.inject.Inject;
@@ -12,17 +12,20 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 
+import java.awt.*;
+import java.awt.event.KeyEvent;
+
 @Slf4j
 @PluginDescriptor(
 	name = "Example"
 )
-public class ExamplePlugin extends Plugin
+public class SoteCornerPlugin extends Plugin
 {
 	@Inject
 	private Client client;
 
 	@Inject
-	private ExampleConfig config;
+	private SoteCornerPlugin config;
 
 	@Override
 	protected void startUp() throws Exception
@@ -39,6 +42,10 @@ public class ExamplePlugin extends Plugin
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged gameStateChanged)
 	{
+
+		Robot r = new Robot();
+		r.keyPress(KeyEvent.VK_ENTER);
+		r.keyRelease(KeyEvent.VK_ENTER);
 		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
 		{
 			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Example says " + config.greeting(), null);
