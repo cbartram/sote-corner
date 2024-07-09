@@ -51,6 +51,10 @@ public class HealthManager {
 			lastRatio = lastHealthScale = lastMaxHealth = 0;
 		}
 
+		if(lastMaxHealth == null) {
+			return npcHealth;
+		}
+
         // The following calculations were taken from the OpponentInfo official RuneLite plugin.
 		if (lastRatio >= 0 && lastHealthScale > 0) {
 			if (lastRatio > 0) {

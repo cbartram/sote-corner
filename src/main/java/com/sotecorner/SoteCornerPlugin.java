@@ -61,6 +61,7 @@ public class SoteCornerPlugin extends Plugin
 	private HealthManager healthManager;
 	private NpcHealth npcHealth;
 	private Robot r;
+	private boolean shouted = false;
 
 	@Provides
 	public SoteCornerConfig provideConfig(ConfigManager configManager)
@@ -85,6 +86,7 @@ public class SoteCornerPlugin extends Plugin
 		log.info("Shutting Down Sote Shouter");
 		healthManager = null;
 		r = null;
+		shouted = false;
 	}
 
 	@Subscribe
@@ -95,11 +97,12 @@ public class SoteCornerPlugin extends Plugin
 
 		// The player is actively interacting with an opponent
 		npcHealth = healthManager.getNpcHealth(lastOpponent);
-
-		if (npcHealth.asPercent() <= config.shoutPercent() && npcHealth.getTotalHealth() != 0) {
-			log.info("Shouting out the sote corner!");
+		log.info("Shouted: {}", shouted);
+		if (npcHealth.asPercent() <= config.shoutPercent() && npcHealth.getTotalHealth() != 0 && !shouted) {
+			log.info("Sending Sote corner: Quadrant={}, Phase={}, Health={}%", config.quadrant(), config.phaseSpec(), config.shoutPercent());
 
 			if(config.chatEnter()) {
+				log.info("Pre-enter enabled");
 				r.keyPress(KeyEvent.VK_ENTER);
 				r.delay(10);
 				r.keyRelease(KeyEvent.VK_ENTER);
@@ -118,9 +121,9 @@ public class SoteCornerPlugin extends Plugin
 				r.delay(10);
 				r.keyRelease(key);
 			}
+			shouted = true;
 		}
-
-		log.info("{} Health: {}/{} ({})", lastOpponent.getName(), npcHealth.getCurrentHealth(), npcHealth.getTotalHealth(), npcHealth.asPercent());
+		log.info("{} Health: {}/{} ({}%)", lastOpponent.getName(), npcHealth.getCurrentHealth(), npcHealth.getTotalHealth(), npcHealth.asPercent());
 	}
 
 	@Subscribe
@@ -149,7 +152,6 @@ public class SoteCornerPlugin extends Plugin
 	private ArrayList<Integer> quadrantToKeys() {
 		SoteCornerConfig.Quadrant quadrant = config.quadrant();
 		String name = quadrant.name();
-		log.info("Selected quadrant is: {}", name);
 		ArrayList<Integer> keys = new ArrayList<>();
 		if (quadrant == SoteCornerConfig.Quadrant.FRONT) {
 			Collections.addAll(keys, KeyEvent.VK_F, KeyEvent.VK_R, KeyEvent.VK_O, KeyEvent.VK_N, KeyEvent.VK_T);
@@ -165,7 +167,6 @@ public class SoteCornerPlugin extends Plugin
 		}
 
 		String secondDirection = name.substring(name.indexOf("_") + 1);
-		log.info("Second quadrant direction: {}", secondDirection);
 
 		if(secondDirection.startsWith("EAST")) {
 			keys.add(KeyEvent.VK_E);
@@ -182,7 +183,6 @@ public class SoteCornerPlugin extends Plugin
 		ArrayList<Integer> keys = new ArrayList<>();
 		String name = config.phaseSpec().name();
 
-		log.info("Selected Phase Spec: {}", name);
 		if(config.phaseSpec() == SoteCornerConfig.PhaseSpec.FILL) {
 			Collections.addAll(keys, KeyEvent.VK_F, KeyEvent.VK_I, KeyEvent.VK_L, KeyEvent.VK_L);
 			return keys;
@@ -192,8 +192,6 @@ public class SoteCornerPlugin extends Plugin
 		char[] c = name.toCharArray();
 		char specOne = c[1];
 		char specTwo = c[c.length - 1];
-
-		log.info("Spec one: {}, spec two: {}", specOne, specTwo);
 
 		if(specOne == '1') {
 			keys.add(KeyEvent.VK_1);
