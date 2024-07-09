@@ -5,8 +5,6 @@ import net.runelite.api.Actor;
 import net.runelite.api.NPC;
 import net.runelite.client.game.NPCManager;
 
-import java.text.DecimalFormat;
-
 /**
  * HealthManager
  * A helper class dedicated to estimating the current remaining HP of an
@@ -15,7 +13,6 @@ import java.text.DecimalFormat;
 @Slf4j
 public class HealthManager {
 
-    private static final DecimalFormat PERCENT_FORMAT = new DecimalFormat("0.0");
 	private NPCManager npcManager;
     private NpcHealth npcHealth = new NpcHealth();
 
@@ -72,17 +69,4 @@ public class HealthManager {
 		}
         return npcHealth;
     }
-
-    /**
-     * Returns the current NPC health remaining as a percentage of its total health.
-     * i.e. if an NPC has 50/100 HP remaining it will return 50%.
-     * @return A formatted string representing the remaining HP percentage.
-     */
-    public String asPercent() {
-        if (npcHealth == null) {
-            return "0%";
-        }
-		double percent = 100.0 * npcHealth.getCurrentHealth() / npcHealth.getTotalHealth();
-		return PERCENT_FORMAT.format(percent) + "%";
-	}
 }

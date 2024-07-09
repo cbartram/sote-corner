@@ -18,6 +18,10 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 
 import javax.inject.Inject;
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Set;
 
 @Slf4j
@@ -54,11 +58,9 @@ public class SoteCornerPlugin extends Plugin
 	@Getter(AccessLevel.PACKAGE)
 	private Actor lastOpponent;
 
-	@Getter(AccessLevel.PACKAGE)
 	private HealthManager healthManager;
-
-	@Getter
 	private NpcHealth npcHealth;
+	private Robot r;
 
 	@Provides
 	public SoteCornerConfig provideConfig(ConfigManager configManager)
@@ -70,12 +72,19 @@ public class SoteCornerPlugin extends Plugin
 	protected void startUp() throws Exception {
 		log.info("Starting Sote Shouter");
 		healthManager = new HealthManager(npcManager);
+		try {
+			r = new Robot();
+		} catch (AWTException e) {
+			log.error("AWTException thrown while attempting to shout the sote corner.");
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	protected void shutDown() throws Exception {
 		log.info("Shutting Down Sote Shouter");
 		healthManager = null;
+		r = null;
 	}
 
 	@Subscribe
@@ -86,7 +95,21 @@ public class SoteCornerPlugin extends Plugin
 
 		// The player is actively interacting with an opponent
 		npcHealth = healthManager.getNpcHealth(lastOpponent);
-		log.info("{} Health: {}/{} ({})", lastOpponent.getName(), npcHealth.getCurrentHealth(), npcHealth.getTotalHealth(), healthManager.asPercent());
+
+		if (npcHealth.asPercent() <= config.shoutPercent()) {
+			log.info("Shouting out the sote corner!");
+			try {
+				Robot r = new Robot();
+				r.keyPress(KeyEvent.VK_ENTER);
+				r.keyRelease(KeyEvent.VK_ENTER);
+			} catch (AWTException e) {
+				log.error("AWTException thrown while attempting to shout the sote corner.");
+				e.printStackTrace();
+			}
+
+		}
+
+		log.info("{} Health: {}/{} ({})", lastOpponent.getName(), npcHealth.getCurrentHealth(), npcHealth.getTotalHealth(), npcHealth.asPercent());
 	}
 
 	@Subscribe
@@ -109,6 +132,76 @@ public class SoteCornerPlugin extends Plugin
 			// TODO remove this else when ready to actually test in TOB
 			lastOpponent = opponent;
 		}
+	}
+
+
+	private ArrayList<Integer> quadrantToKeys() {
+		SoteCornerConfig.Quadrant quadrant = config.quadrant();
+		String name = quadrant.name();
+		log.info("Selected quadrant is: {}", name);
+		ArrayList<Integer> keys = new ArrayList<>();
+		if (quadrant == SoteCornerConfig.Quadrant.FRONT) {
+			Collections.addAll(keys, KeyEvent.VK_F, KeyEvent.VK_R, KeyEvent.VK_O, KeyEvent.VK_N, KeyEvent.VK_T, KeyEvent.VK_SPACE);
+			return keys;
+		}
+
+		if(name.startsWith("NORTH")) {
+			keys.add(KeyEvent.VK_N);
+		}
+
+		if(name.startsWith("SOUTH")) {
+			keys.add(KeyEvent.VK_S);
+		}
+
+		String secondDirection = name.substring(name.indexOf("_") + 1);
+		log.info("Second quadrant direction: {}", secondDirection);
+
+		if(secondDirection.startsWith("EAST")) {
+			keys.add(KeyEvent.VK_E);
+		}
+
+		if(secondDirection.startsWith("WEST")) {
+			keys.add(KeyEvent.VK_W);
+		}
+
+		return keys;
+	}
+
+	private ArrayList<Integer> phaseSpecToKeys() {
+		ArrayList<Integer> keys = new ArrayList<>();
+		String name = config.phaseSpec().name();
+
+		log.info("Selected Phase Spec: {}", name);
+		if(config.phaseSpec() == SoteCornerConfig.PhaseSpec.FILL) {
+			Collections.addAll(keys, KeyEvent.VK_F, KeyEvent.VK_I, KeyEvent.VK_L, KeyEvent.VK_L, KeyEvent.VK_SPACE);
+			return keys;
+		}
+
+
+		// Specs are PX_PY this simply grabs the x and y values from any phase spec enum.
+		char[] c = name.toCharArray();
+		char specOne = c[1];
+		char specTwo = c[c.length - 1];
+
+		log.info("Spec one: {}, spec two: {}", specOne, specTwo);
+
+		if(specOne == '1') {
+			keys.add(KeyEvent.VK_1);
+		}
+
+		if(specOne == '2') {
+			keys.add(KeyEvent.VK_2);
+		}
+
+		if(specTwo == '2') {
+			keys.add(KeyEvent.VK_2);
+		}
+
+		if(specTwo == '3') {
+			keys.add(KeyEvent.VK_3);
+		}
+
+		return keys;
 	}
 
 }

@@ -3,6 +3,7 @@ package com.sotecorner;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.Range;
 
 @ConfigGroup("General")
 public interface SoteCornerConfig extends Config
@@ -41,5 +42,16 @@ public interface SoteCornerConfig extends Config
 	)
 	default PhaseSpec phaseSpec() {
 		return PhaseSpec.P1_P2;
+	}
+
+	@Range(min = 5, max = 99)
+	@ConfigItem(
+		keyName = "shoutPercent",
+		name = "Shout Percent",
+		description = "The percentage of Nylo HP remaining to shout your Soteseg corner.",
+		position = 3
+	)
+	default int shoutPercent() {
+		return 20;
 	}
 }
