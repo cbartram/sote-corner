@@ -2,13 +2,11 @@ package com.sotecorner;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Provides;
+import joptsimple.internal.Strings;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Actor;
-import net.runelite.api.Client;
-import net.runelite.api.NPC;
-import net.runelite.api.NpcID;
+import net.runelite.api.*;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.InteractingChanged;
 import net.runelite.client.config.ConfigManager;
@@ -23,6 +21,7 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @PluginDescriptor(
@@ -99,12 +98,12 @@ public class SoteCornerPlugin extends Plugin
 		npcHealth = healthManager.getNpcHealth(lastOpponent);
 		log.info("Shouted: {}", shouted);
 		if (npcHealth.asPercent() <= config.shoutPercent() && npcHealth.getTotalHealth() != 0 && !shouted) {
-			log.info("Sending Sote corner: Quadrant={}, Phase={}, Health={}%", config.quadrant(), config.phaseSpec(), config.shoutPercent());
+			log.info("Sending Sote chat: Quadrant={}, Phase={}, Health={}%", config.quadrant(), config.phaseSpec(), config.shoutPercent());
 
 			if(config.chatEnter()) {
 				log.info("Pre-enter enabled");
 				r.keyPress(KeyEvent.VK_ENTER);
-				r.delay(10);
+				r.delay(120);
 				r.keyRelease(KeyEvent.VK_ENTER);
 			}
 
@@ -115,10 +114,11 @@ public class SoteCornerPlugin extends Plugin
 			phaseSpecKeys.add(KeyEvent.VK_ENTER);
 
 			quadrantKeys.addAll(phaseSpecKeys);
-
+			log.info("Key codes: {}", Strings.join(quadrantKeys.stream().map(KeyEvent::getKeyText).collect(Collectors.toList()), ","));
 			for (Integer key : quadrantKeys) {
+				log.info("Pressing Key: {}", KeyEvent.getKeyText(key));
 				r.keyPress(key);
-				r.delay(10);
+				r.delay(1000);
 				r.keyRelease(key);
 			}
 			shouted = true;
