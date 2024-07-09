@@ -1,19 +1,45 @@
-package com.example;
+package com.sotecorner;
 
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup("example")
+@ConfigGroup("General")
 public interface SoteCornerConfig extends Config
 {
+
+	enum Quadrant {
+		NORTH_EAST,
+		SOUTH_EAST,
+		NORTH_WEST,
+		SOUTH_WEST,
+		FRONT, // For 5 man raids
+	}
+
+	enum PhaseSpec {
+		P1_P2,
+		P2_P3,
+		P1_P3,
+		FILL,
+	}
+
 	@ConfigItem(
-		keyName = "greeting",
-		name = "Welcome Greeting",
-		description = "The message to show to the user when they login"
+            keyName = "quadrant",
+            name = "Quadrant",
+            description = "The quadrant of the room you want to call out to team-mates.",
+            position = 1
+    )
+    default Quadrant quadrant() {
+		return Quadrant.NORTH_EAST;
+	}
+
+	@ConfigItem(
+			keyName = "phaseSpec",
+			name = "Special Attack Phase",
+			description = "The phases that you will be dropping your Dragon Warhammer special attacks.",
+			position = 2
 	)
-	default String greeting()
-	{
-		return "Hello";
+	default PhaseSpec phaseSpec() {
+		return PhaseSpec.P1_P2;
 	}
 }
