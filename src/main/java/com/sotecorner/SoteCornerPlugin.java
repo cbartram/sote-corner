@@ -96,17 +96,28 @@ public class SoteCornerPlugin extends Plugin
 		// The player is actively interacting with an opponent
 		npcHealth = healthManager.getNpcHealth(lastOpponent);
 
-		if (npcHealth.asPercent() <= config.shoutPercent()) {
+		if (npcHealth.asPercent() <= config.shoutPercent() && npcHealth.getTotalHealth() != 0) {
 			log.info("Shouting out the sote corner!");
-			try {
-				Robot r = new Robot();
+
+			if(config.chatEnter()) {
 				r.keyPress(KeyEvent.VK_ENTER);
+				r.delay(10);
 				r.keyRelease(KeyEvent.VK_ENTER);
-			} catch (AWTException e) {
-				log.error("AWTException thrown while attempting to shout the sote corner.");
-				e.printStackTrace();
 			}
 
+			ArrayList<Integer> quadrantKeys = quadrantToKeys();
+			quadrantKeys.add(KeyEvent.VK_SPACE);
+
+			ArrayList<Integer> phaseSpecKeys = phaseSpecToKeys();
+			phaseSpecKeys.add(KeyEvent.VK_ENTER);
+
+			quadrantKeys.addAll(phaseSpecKeys);
+
+			for (Integer key : quadrantKeys) {
+				r.keyPress(key);
+				r.delay(10);
+				r.keyRelease(key);
+			}
 		}
 
 		log.info("{} Health: {}/{} ({})", lastOpponent.getName(), npcHealth.getCurrentHealth(), npcHealth.getTotalHealth(), npcHealth.asPercent());
@@ -141,7 +152,7 @@ public class SoteCornerPlugin extends Plugin
 		log.info("Selected quadrant is: {}", name);
 		ArrayList<Integer> keys = new ArrayList<>();
 		if (quadrant == SoteCornerConfig.Quadrant.FRONT) {
-			Collections.addAll(keys, KeyEvent.VK_F, KeyEvent.VK_R, KeyEvent.VK_O, KeyEvent.VK_N, KeyEvent.VK_T, KeyEvent.VK_SPACE);
+			Collections.addAll(keys, KeyEvent.VK_F, KeyEvent.VK_R, KeyEvent.VK_O, KeyEvent.VK_N, KeyEvent.VK_T);
 			return keys;
 		}
 
@@ -173,10 +184,9 @@ public class SoteCornerPlugin extends Plugin
 
 		log.info("Selected Phase Spec: {}", name);
 		if(config.phaseSpec() == SoteCornerConfig.PhaseSpec.FILL) {
-			Collections.addAll(keys, KeyEvent.VK_F, KeyEvent.VK_I, KeyEvent.VK_L, KeyEvent.VK_L, KeyEvent.VK_SPACE);
+			Collections.addAll(keys, KeyEvent.VK_F, KeyEvent.VK_I, KeyEvent.VK_L, KeyEvent.VK_L);
 			return keys;
 		}
-
 
 		// Specs are PX_PY this simply grabs the x and y values from any phase spec enum.
 		char[] c = name.toCharArray();

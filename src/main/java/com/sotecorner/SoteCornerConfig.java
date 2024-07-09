@@ -54,4 +54,14 @@ public interface SoteCornerConfig extends Config
 	default int shoutPercent() {
 		return 20;
 	}
+
+	@ConfigItem(
+			keyName = "chatEnter",
+			name = "Enter to Chat",
+			description = "Check this box if you need to press the \"Enter\" key before chatting.",
+			position = 4
+	)
+	default boolean chatEnter() {
+		return false;
+	}
 }

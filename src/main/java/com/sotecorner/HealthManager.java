@@ -43,7 +43,10 @@ public class HealthManager {
 			lastRatio = opponent.getHealthRatio();
 			lastHealthScale = opponent.getHealthScale();
 			lastMaxHealth = npcManager.getHealth(opponent.getId());
-			npcHealth.setTotalHealth(lastMaxHealth);
+
+			if(lastMaxHealth != null) {
+				npcHealth.setTotalHealth(lastMaxHealth);
+			}
 		} else {
 			lastRatio = lastHealthScale = lastMaxHealth = 0;
 		}
